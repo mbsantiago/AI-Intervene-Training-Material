@@ -1,0 +1,37 @@
+[project]
+name = "training"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "folium==0.20.0",
+  "geopandas==1.1.1",
+  "google-colab",
+  "httplib2>=0.31.0",
+  "ipython==7.34.0",
+  "ipywidgets==7.7.2",
+  "jupyter>=1.1.1",
+  "matplotlib==3.10.0",
+  "numpy==2.0.2",
+  "pandas==2.2.2",
+  "pillow==11.3.0",
+  "pyarrow==18.1.0",
+  "seaborn==0.13.2",
+]
+
+[dependency-groups]
+dev = [
+  "black>=25.9.0",
+  "catppuccin-jupyterlab>=0.2.4",
+  "isort>=6.0.1",
+  "jupyterlab>=4.4.7",
+  "jupyterlab-code-formatter>=3.0.2",
+  "jupyterlab-lsp>=5.2.0",
+  "jupyterlab-spellchecker>=0.8.4",
+  "jupyterlab-vim>=4.1.4",
+  "ruff>=0.13.1",
+]
+
+[tool.uv.sources]
+google-colab = { git = "https://github.com/googlecolab/colabtools" }
