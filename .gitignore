@@ -10,3 +10,5 @@ wheels/
 .venv
 .ipynb_checkpoints
 CameraTrapsAI/ai_outputs.csv
+CameraTrapsAI/data
+CameraTrapsAI/tmp
