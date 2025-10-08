@@ -52,5 +52,4 @@ if [ ! -d models/speciesnet ]; then
     mkdir models/speciesnet
     curl -L -o model.tar.gz https://www.kaggle.com/api/v1/models/google/speciesnet/pyTorch/v4.0.1a/1/download
     tar -xvf model.tar.gz --directory models/speciesnet
-    rm model.tar.gz
 fi
