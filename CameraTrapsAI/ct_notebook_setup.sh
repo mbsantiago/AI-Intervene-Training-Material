@@ -50,7 +50,7 @@ fi
 if [ ! -d models/speciesnet ]; then
     echo "Downloading speciesnet model"
     mkdir models/speciesnet
-    wget -q -o model.tar.gz https://www.kaggle.com/api/v1/models/google/speciesnet/pyTorch/v4.0.1a/1/download
+    curl -L -o model.tar.gz https://www.kaggle.com/api/v1/models/google/speciesnet/pyTorch/v4.0.1a/1/download
     tar -xvf model.tar.gz --directory models/speciesnet
     rm model.tar.gz
 fi
