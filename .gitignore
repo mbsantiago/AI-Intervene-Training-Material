@@ -12,3 +12,4 @@ wheels/
 CameraTrapsAI/ai_outputs.csv
 CameraTrapsAI/data
 CameraTrapsAI/tmp
+BioacousticsAI/data
