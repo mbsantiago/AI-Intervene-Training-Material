@@ -60,17 +60,44 @@ def bbox_area(bbox: np.ndarray) -> np.ndarray:
     return (bbox[:, 2] - bbox[:, 0]) * (bbox[:, 3] - bbox[:, 1])
 
 
-def bbox_iou(bbox1: np.ndarray, bbox2: np.ndarray):
+def bbox_iou(
+    bbox1: np.ndarray,
+    bbox2: np.ndarray,
+    time_scale: float = 1000,
+    freq_scale: float = 1 / 1000,
+):
     """Compute the intersection over union of a pair of bounding boxes.
 
-    Bounding boxes are in the format [left, top, right, bottom].
+    Bounding boxes are expected in the format `[left, top, right, bottom]`.
+    The dimensions typically represent time (seconds) and frequency (Hz).
+
+    IoU is calculated on the *scaled* bounding box dimensions:
+    Area = (right - left) * time_scale * (bottom - top) * freq_scale
+
+    The `time_scale` and `freq_scale` parameters are used to adjust the
+    relative contribution of the time and frequency dimensions to the IoU
+    result. For instance, for events with small time-duration but large
+    bandwidth, scaling can prevent the frequency dimension from dominating the
+    final IoU score.
 
     Args:
-        bbox1: Array of bounding boxes.
-        bbox2: Array of bounding boxes.
+        bbox1: Array of bounding boxes, with shape `(n, 4)`.
+        bbox2: Array of bounding boxes, with shape `(m, 4)`.
+        time_scale: Scaling factor for the time dimension. Default is 1.0.
+        freq_scale: Scaling factor for the frequency dimension. Default is 1.0.
+
+    Returns:
+        Array of IoU values, shape `(n, m)`.
     """
 
-    scale = np.array([1000, 1 / 1000, 1000, 1 / 1000])
+    scale = np.array(
+        [
+            time_scale,
+            freq_scale,
+            time_scale,
+            freq_scale,
+        ]
+    )
     bbox1 = bbox1 * scale
     bbox2 = bbox2 * scale
 
@@ -150,6 +177,8 @@ def match_bboxes(
     true_bboxes: np.ndarray,
     pred_bboxes: np.ndarray,
     iou_threshold: float = 0.5,
+    time_scale: float = 1,
+    freq_scale: float = 1,
 ) -> pd.DataFrame:
     """Match bounding boxes.
 
@@ -160,6 +189,8 @@ def match_bboxes(
         true_bbox: Array of bounding boxes.
         pred_bbox: Array of bounding boxes.
         iou_threshold: Threshold for the intersection over union.
+        time_scale: Scale for the time dimension.
+        freq_scale: Scale for the frequency dimension.
 
     Returns:
         Dataframe with the following columns:
@@ -167,7 +198,7 @@ def match_bboxes(
             prediction: Index of the prediction.
             affinity: Intersection over union.
     """
-    iou = bbox_iou(true_bboxes, pred_bboxes)
+    iou = bbox_iou(true_bboxes, pred_bboxes, time_scale, freq_scale)
     matches = maximal_matching(iou)
     return matches[matches["affinity"] > iou_threshold]
 
@@ -177,6 +208,8 @@ def compute_file_precision_recall(
     detections: pd.DataFrame,
     annotations: pd.DataFrame,
     iou_threshold: float = 0.5,
+    time_scale: float = 1,
+    freq_scale: float = 1,
 ) -> Tuple[float, float]:
     """Compute the precision and recall for a file.
 
@@ -200,7 +233,13 @@ def compute_file_precision_recall(
     # IoU less than 0.5
     pred_boxes = bboxes_from_annotations(file_detections)
     true_boxes = bboxes_from_annotations(file_annotations)
-    matches = match_bboxes(true_boxes, pred_boxes, iou_threshold=iou_threshold)
+    matches = match_bboxes(
+        true_boxes,
+        pred_boxes,
+        iou_threshold=iou_threshold,
+        time_scale=time_scale,
+        freq_scale=freq_scale,
+    )
 
     # total number of annotated sound events
     positives = len(file_annotations)
@@ -230,6 +269,8 @@ def compute_detection_metrics(
     detections: pd.DataFrame,
     annotations: pd.DataFrame,
     iou_threshold: float = 0.5,
+    time_scale: float = 1,
+    freq_scale: float = 1,
 ) -> Tuple[float, float, float, float]:
     """Compute the precision and recall for a file.
 
@@ -237,6 +278,9 @@ def compute_detection_metrics(
         filename: Name of the file.
         detections: Dataframe with detections.
         annotations: Dataframe with annotations.
+        iou_threshold: Threshold for the intersection over union.
+        time_scale: Scale for the time dimension.
+        freq_scale: Scale for the frequency dimension.
 
     Returns:
         positives, true_positives, false_positives, false_negatives
@@ -253,7 +297,13 @@ def compute_detection_metrics(
     # IoU less than 0.5
     pred_boxes = bboxes_from_annotations(file_detections)
     true_boxes = bboxes_from_annotations(file_annotations)
-    matches = match_bboxes(true_boxes, pred_boxes, iou_threshold=iou_threshold)
+    matches = match_bboxes(
+        true_boxes,
+        pred_boxes,
+        iou_threshold=iou_threshold,
+        time_scale=time_scale,
+        freq_scale=freq_scale,
+    )
 
     # total number of annotated sound events
     positives = len(file_annotations)

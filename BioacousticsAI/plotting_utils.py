@@ -21,6 +21,8 @@ __all__ = [
     "plot_waveform",
     "plot_waveform_with_spectrogram",
     "plot_spectrogram",
+    "plot_spectrogram_and_detection",
+    "plot_spectrogram_with_predictions_and_annotations",
     "WINDOW_OPTIONS",
     "COLORMAPS",
 ]
@@ -273,11 +275,13 @@ def plot_spectrogram_with_predictions_and_annotations(
     annotations: pd.DataFrame,
     ax=None,
     figsize=(14, 4),
-    cmap="magma",
-    n_fft=512,
-    hop_length=128,
-    iou_threshold=0.5,
-    linewidth=1,
+    cmap: str = "magma",
+    n_fft: int = 512,
+    hop_length: int = 128,
+    iou_threshold: float = 0.5,
+    time_scale: float = 1,
+    freq_scale: float = 1,
+    linewidth: float = 1,
 ):
     """Plot the spectrogram of an audio file and predictions and annotations.
 
@@ -345,7 +349,13 @@ def plot_spectrogram_with_predictions_and_annotations(
 
     true_boxes = bboxes_from_annotations(annotations)
     pred_boxes = bboxes_from_annotations(predictions)
-    matches = match_bboxes(true_boxes, pred_boxes, iou_threshold=iou_threshold)
+    matches = match_bboxes(
+        true_boxes,
+        pred_boxes,
+        iou_threshold=iou_threshold,
+        time_scale=time_scale,
+        freq_scale=freq_scale,
+    )
 
     matched_annotations = set(matches["annotation"])
     matched_predictions = set(matches["prediction"])
